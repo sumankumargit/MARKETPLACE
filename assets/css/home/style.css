@@ -1,0 +1,12 @@
+/* Code by: @Sumna */
+
+/* CSS for centring heading */
+h1{
+    color: red;
+    text-align: center;
+    margin-top: 20px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-weight: 900;
+    font-size: 100px;
+}
+
