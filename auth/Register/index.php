@@ -292,7 +292,8 @@ $(document).ready(function () {
                         allowOutsideClick: false
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            window.location.href = <?php echo $base_url?>.'auth/Login/';
+                            window.location.href = "<?php echo $base_url; ?>auth/Login/";
+
                         }
                     });
                 } else {
