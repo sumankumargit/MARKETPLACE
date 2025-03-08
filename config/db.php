@@ -42,7 +42,7 @@ class Database {
 }
 
 // Test connection
-// $db = new Database();
-// $conn = $db->connect();
+$db = new Database();
+$conn = $db->connect();
 
 ?>
