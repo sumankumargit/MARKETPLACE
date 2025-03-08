@@ -89,7 +89,7 @@ if (isset($_SESSION['user_id'])) {
         <!-- Register & Login Links -->
         <div class="mt-3 text-center">
             <p class="mb-1">Already have an account?</p>
-            <a href="<?= $base_url; ?>auth/login" class="btn btn-outline-primary w-100">Login</a>
+            <a href="<?= $base_url; ?>auth/Login" class="btn btn-outline-primary w-100">Login</a>
         </div>
     </div>
 </div>
