@@ -1,17 +1,30 @@
+<?php require_once '../config/config.php'; ?>
+<?php require_once '../config/db.php'; ?>
+
 <?php
 
-require('../config/config.php');
-
-
-if($_GET["id"]) {
-    $job_id = $_GET["id"];
-
-} else {
-    echo "Invalid job id";
-
-
+if (!isset($_SESSION['user_id'])) {
+    header("Location: " . $base_url . "auth/login/");
+    exit();
 }
 
+if ($_SESSION['user_type'] !== 'bidder') {
+    header("Location: " . $base_url);
+    exit();
+}
+
+$bidder_id = $_SESSION['user_id'];
+
+// Fetch user's bids
+$db = new Database();
+$conn = $db->connect();
+
+$stmt = $conn->prepare("SELECT b.bid_id, b.bid_amount, b.created_at, j.title, j.job_id
+                        FROM bids b
+                        JOIN jobs j ON b.job_id = j.job_id
+                        WHERE b.bidder_id = :bidder_id");
+$stmt->execute(['bidder_id' => $bidder_id]);
+$bids = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -19,65 +32,83 @@ if($_GET["id"]) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../assets/bootstrap-5.3.3-dist/css/bootstrap.min.css">
-
+    <title>My Bids</title>
+    <?php require_once '../includes/headlinks.php'; ?>
 </head>
 <body>
-    <?php include('../includes/nav.php'); ?>
-    <h1>BIDDING FORM</h1>
-    <center><form id="bid_form" class="m-5 bg-gray" action="">
-    <div class="mb-3">
+    <?php require_once '../includes/nav.php'; ?>
 
-        <label  class="form-label" for="job_id">Job ID:</label><br>
+    <div class="container mt-5">
+        <h2 class="mb-4">My Bids</h2>
 
-        <input type="text" id="job_id" value="<?php echo $job_id ?>" name="job_id" readonly><br>
-        </div>
-        <div class="mb-3">
-        <label  class="form-label" for="bidder_name">Bidder Name:</label><br>
-        <input type="text" id="bidder_name" name="bidder_name"><br>
-        </div>
-        <div class="mb-3">
-        <label  class="form-label" for="bid_amount">Bid Amount:</label><br>
-        <input type="text" id="bid_amount" name="bid_amount"><br>
-        </div>
-        <input class="btn btn-success" type="submit" value="Submit">
+        <?php if ($bids): ?>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Bid Amount</th>
+                        <th>Placed On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($bids as $bid): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($bid['title']); ?></td>
+                            <td>₹ <?php echo number_format($bid['bid_amount'], 2); ?></td>
+                            <td><?php echo date('F j, Y, g:i a', strtotime($bid['created_at'])); ?></td>
+                            <td>
+                                <button class="btn btn-danger delete-btn" data-bid-id="<?php echo $bid['bid_id']; ?>">Delete</button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p>No bids placed yet.</p>
+        <?php endif; ?>
+    </div>
 
-    </form></center>
+    <?php require_once '../includes/footerlinks.php'; ?>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+$(document).ready(function() {
+    $('.delete-btn').on('click', function() {
+        const bidId = $(this).data('bid-id');
 
-    <script src="../assets/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-    <script>
-        $(document).ready(function() {
-            $('#bid_form').submit(function(e) {
-                e.preventDefault();
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
                 $.ajax({
                     type: 'POST',
-                    url: 'bidding_api.php',
-                    data: $('#bid_form').serialize(),
+                    url: '../api/bidding/delete_bid.php',
+                    data: { bid_id: bidId },
+                    dataType: 'json',
                     success: function(response) {
-                        // console.log(response);
-                        Swal.fire({
-                            title: 'Success',
-                            text: 'Bid submitted successfully',
-                            icon: 'success',
-                            confirmButtonText: 'Ok'
-                        }).then(function() {
-                            window.location = 'biddings.php';
-                        });
+                        if (response.status === 'success') {
+                            Swal.fire('Deleted!', response.message, 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                        }
                     },
-                    error: function(response) {
-                        console.log(response);
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'An error occurred. Please try again.', 'error');
                     }
                 });
-            });
+            }
         });
-    </script>
+    });
+});
+</script>
 
 </body>
 </html>

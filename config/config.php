@@ -1,4 +1,7 @@
 <?php
+session_start();
+$base_url = 'http://localhost/task/';
 
-$BASE_URL = 'http://localhost:8000/';
+date_default_timezone_set('Asia/Kolkata');
+
 ?>
