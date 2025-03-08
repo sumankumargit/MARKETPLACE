@@ -30,7 +30,7 @@ class Database {
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC // Fetch as associative array
                 ]);
 
-            // echo "Connected successfully!";
+            echo "Connected successfully!";
         } catch (PDOException $e) {
             
             error_log("Database connection failed: " . $e->getMessage());
