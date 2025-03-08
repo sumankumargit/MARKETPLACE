@@ -50,7 +50,7 @@ if (isset($_SESSION['user_id'])) {
             <div class="mt-3 text-center">
             <p class="mb-1">Dont have an account?</p>
 
-                <a href="<?= $base_url; ?>auth/register" class="btn btn-secondary w-100 rounded">Register</a>
+                <a href="<?= $base_url; ?>auth/Register" class="btn btn-secondary w-100 rounded">Register</a>
             </div>
         </form>
     </div>
