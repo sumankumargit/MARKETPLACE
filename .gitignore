@@ -1,25 +1,26 @@
-# CakePHP 3
+# Ignore Composer dependencies
+/vendor/
+!composer.json
+!composer.lock
 
-/vendor/*
+# Ignore sensitive config files
 /config/app.php
+!/config/app.default.php
 
-/tmp/cache/models/*
+# Ignore CakePHP cache, logs, sessions
+/tmp/
 !/tmp/cache/models/empty
-/tmp/cache/persistent/*
 !/tmp/cache/persistent/empty
-/tmp/cache/views/*
 !/tmp/cache/views/empty
-/tmp/sessions/*
 !/tmp/sessions/empty
-/tmp/tests/*
 !/tmp/tests/empty
-
-/logs/*
+/logs/
 !/logs/empty
 
-# CakePHP 2
-
-/app/tmp/*
+# Ignore CakePHP 2 config files
 /app/Config/core.php
 /app/Config/database.php
-/vendors/*
+!/app/Config/database.default.php
+
+# Ignore CakePHP 2 tmp files
+/app/tmp/
