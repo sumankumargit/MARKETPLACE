@@ -152,5 +152,22 @@ $totalPages = ceil($totalJobs / $limit);
 });
 
 </script>
+
+<script>
+    $(document).ready(function () {
+    $.ajax({
+        url: "api/automation/closejobs.php", // Update the path if needed
+        method: "GET",
+        dataType: "json",
+        success: function (response) {
+            console.log(response.message);
+        },
+        error: function () {
+            console.error("Error updating jobs.");
+        }
+    });
+});
+
+</script>
 </body>
 </html>
