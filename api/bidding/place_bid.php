@@ -1,7 +1,10 @@
 <?php
 require_once '../../config/config.php';
 require_once '../../config/db.php';
+require '../../vendor/autoload.php'; // Include PHPMailer
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'bidder') {
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized access.']);
@@ -49,8 +52,73 @@ try {
         'bid_amount' => $bid_amount
     ]);
 
+    // Fetch bidder details
+    $stmt = $conn->prepare("SELECT name, email FROM users WHERE user_id = :bidder_id");
+    $stmt->execute(['bidder_id' => $bidder_id]);
+    $bidder = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Fetch job poster details
+    $stmt = $conn->prepare("SELECT name, email FROM users WHERE user_id = :poster_id");
+    $stmt->execute(['poster_id' => $job['poster_id']]);
+    $poster = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Send emails to bidder and poster
+    sendEmail(
+        $bidder['email'], 
+        "Bid Confirmation - {$job['title']}", 
+        "Hello {$bidder['name']},<br><br>
+        You have successfully placed a bid of <strong>₹{$bid_amount}</strong> on the job: <strong>{$job['title']}</strong>.<br><br>
+        <strong>Job Details:</strong><br>
+        Title: {$job['title']}<br>
+        Description: {$job['description']}<br>
+        Requirements: {$job['requirements']}<br>
+        Expiration Date: {$job['expiration']}<br><br>
+        Thank you for bidding on MarketPlace!"
+    );
+
+    sendEmail(
+        $poster['email'], 
+        "New Bid on Your Job - {$job['title']}", 
+        "Hello {$poster['name']},<br><br>
+        A user has placed a bid on your job: <strong>{$job['title']}</strong>.<br><br>
+        <strong>Bidder Details:</strong><br>
+        Name: {$bidder['name']}<br>
+        Email: {$bidder['email']}<br>
+        Bid Amount: <strong>₹{$bid_amount}</strong><br><br>
+        <strong>Job Details:</strong><br>
+        Title: {$job['title']}<br>
+        Description: {$job['description']}<br>
+        Requirements: {$job['requirements']}<br>
+        Expiration Date: {$job['expiration']}<br><br>
+        Please review the bid and take necessary action.<br><br>
+        Regards,<br>
+        MarketPlace Team"
+    );
+
     echo json_encode(['status' => 'success', 'message' => 'Bid placed successfully!']);
 } catch (PDOException $e) {
     echo json_encode(['status' => 'error', 'message' => 'Failed to place bid: ' . $e->getMessage()]);
+}
+
+// Function to send email using Gmail SMTP
+function sendEmail($to, $subject, $body) {
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'sumankumarchoudhary733@gmail.com'; 
+        $mail->Password = 'gxdd wmcl kzbh pegv'; 
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+        $mail->setFrom('sumankumarchoudhary733@gmail.com', 'MARKET PLACE');
+        $mail->addAddress($to);
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body = $body;
+        $mail->send();
+    } catch (Exception $e) {
+        error_log("Email could not be sent to $to. Error: {$mail->ErrorInfo}");
+    }
 }
 ?>
