@@ -33,7 +33,7 @@ if (isset($_SESSION['user_id'])) {
 
         <form id="registerForm" novalidate autocomplete="off">
             <div class="mb-3">
-                <label for="name" class="form-label">Full Name</label>
+                <label for="name" class="form-label">Full Name(should be more then 3 letters)</label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="John Doe" required minlength="3" autocomplete="off">
                 <div class="invalid-feedback">Name must be at least 3 characters.</div>
             </div>
@@ -61,7 +61,7 @@ if (isset($_SESSION['user_id'])) {
             </div>
 
             <div class="mb-3">
-                <label for="phone" class="form-label">Phone Number</label>
+                <label for="phone" class="form-label">Phone Number(should be 10-15 digits)</label>
                 <input type="tel" class="form-control" id="phone" name="phone" placeholder="1234567890" required pattern="[0-9]{10,15}" autocomplete="off">
                 <div class="invalid-feedback">Enter a valid phone number (10-15 digits).</div>
             </div>
@@ -77,7 +77,7 @@ if (isset($_SESSION['user_id'])) {
             </div>
 
             <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
+                <label for="password" class="form-label">Password(at least 6 letters)</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="********" required minlength="6" autocomplete="new-password">
                 <div class="invalid-feedback">Password must be at least 6 characters.</div>
             </div>
