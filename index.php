@@ -141,10 +141,10 @@ $totalPages = ceil($totalJobs / $limit);
         method: "GET",
         dataType: "json",
         success: function (response) {
-            console.log(response.message);
+            // console.log(response.message);
         },
         error: function () {
-            console.error("Error updating jobs.");
+            // console.error("Error updating jobs.");
         }
     });
 });
@@ -158,10 +158,10 @@ $totalPages = ceil($totalJobs / $limit);
         method: "GET",
         dataType: "json",
         success: function (response) {
-            console.log(response.message);
+            // console.log(response.message);
         },
         error: function () {
-            console.error("Error updating jobs.");
+            // console.error("Error updating jobs.");
         }
     });
 });

@@ -1,7 +1,7 @@
 
     <!-- jQuery and Bootstrap Scripts -->
-    <script src="<?php echo $base_url ?>assets/js/jquery.js"></script>
-    <script src="<?php echo $base_url ?>assets/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<?php echo $base_url?>assets/js/jquery.js"></script>
+    <script src="<?php echo $base_url?>assets/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
 
 
     <!-- DataTables JS (You can use your local file or CDN) -->
