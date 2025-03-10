@@ -4,7 +4,7 @@
 
 // Check if the user is not logged in
 if (!isset($_SESSION['user_id'])) {
-    header("Location: " . $base_url . "auth/login/");
+    header("Location: " . $base_url . "auth/Login/");
     exit();
 }
 

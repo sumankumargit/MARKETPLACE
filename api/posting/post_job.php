@@ -1,6 +1,10 @@
 <?php
 require_once '../../config/config.php';
 require_once '../../config/db.php';
+require '../../vendor/autoload.php'; // Include PHPMailer
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 // Enable error logging for debugging
 ini_set('display_errors', 1);
@@ -40,27 +44,72 @@ if (!$conn) {
 }
 
 try {
-    // Prepare SQL query using PDO
+    // Insert job into the database
     $stmt = $conn->prepare("INSERT INTO jobs (poster_id, title, description, requirements, expiration) 
                             VALUES (:poster_id, :title, :description, :requirements, :expiration)");
+    
+    $stmt->execute([
+        'poster_id' => $_SESSION['user_id'],
+        'title' => $title,
+        'description' => $description,
+        'requirements' => $requirements,
+        'expiration' => $expiration_datetime
+    ]);
+    
+    // Send email notifications
+    $poster_email = $_SESSION['user_email'];
+    $poster_name = $_SESSION['user_name'] ?? 'Job Poster';
+    
+    // Email to poster
+    sendEmail($poster_email, "Job Posted Successfully - $title", 
+        "Hello $poster_name,<br><br>
+        Your job <strong>$title</strong> has been posted successfully.<br><br>
+        Regards,<br>MarketPlace Team");
 
-    // Bind parameters
-    $stmt->bindParam(':poster_id', $_SESSION['user_id'], PDO::PARAM_INT);
-    $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-    $stmt->bindParam(':description', $description, PDO::PARAM_STR);
-    $stmt->bindParam(':requirements', $requirements, PDO::PARAM_STR);
-    $stmt->bindParam(':expiration', $expiration_datetime, PDO::PARAM_STR);
-
-    // Execute query
-    if ($stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Job posted successfully.']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Failed to post the job.']);
+    // Fetch all bidders
+    $stmt = $conn->prepare("SELECT name, email FROM users WHERE user_type = 'bidder'");
+    $stmt->execute();
+    $bidders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Email to all bidders
+    foreach ($bidders as $bidder) {
+        sendEmail($bidder['email'], "New Job Posted - $title",
+            "Hello {$bidder['name']},<br><br>
+            A new job <strong>$title</strong> has been posted by <strong>$poster_name</strong>.<br><br>
+            <strong>Job Details:</strong><br>
+            Description: $description<br>
+            Requirements: $requirements<br>
+            Expiration Date: $expiration<br><br>
+            Log in to apply.<br><br>
+            Regards,<br>MarketPlace Team");
     }
+
+    echo json_encode(['status' => 'success', 'message' => 'Job posted successfully. Emails sent.']);
 } catch (PDOException $e) {
     echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
 }
 
-// Close connection
 $conn = null;
+
+// Function to send emails
+function sendEmail($to, $subject, $body) {
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'sumankumarchoudhary733@gmail.com';
+        $mail->Password = 'gxdd wmcl kzbh pegv';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+        $mail->setFrom('sumankumarchoudhary733@gmail.com', 'MarketPlace');
+        $mail->addAddress($to);
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body = $body;
+        $mail->send();
+    } catch (Exception $e) {
+        error_log("Email could not be sent to $to. Error: {$mail->ErrorInfo}");
+    }
+}
 ?>
