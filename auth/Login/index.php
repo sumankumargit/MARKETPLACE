@@ -1,8 +1,5 @@
-
-
 <?php require_once '../../config/config.php'; ?>
 <?php
-
 
 // Check if the user is already logged in
 if (isset($_SESSION['user_id'])) {
@@ -11,7 +8,6 @@ if (isset($_SESSION['user_id'])) {
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
